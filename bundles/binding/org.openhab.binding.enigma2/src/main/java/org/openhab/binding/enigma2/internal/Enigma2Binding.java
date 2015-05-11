@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.enigma2.internal;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -51,7 +54,7 @@ public class Enigma2Binding extends
 	 * the refresh interval which is used to poll values from the Enigma2 server
 	 * (optional, defaults to 60000ms)
 	 */
-	private long refreshInterval = 60000;
+	private long refreshInterval = 10000;
 
 	public Enigma2Binding() {
 	}
@@ -94,10 +97,22 @@ public class Enigma2Binding extends
 						.getBindingConfigFor(name);
 				String deviceId = bindingConfig.getDeviceId();
 
+				boolean reachable = false;
+				
+				try {
+					reachable = InetAddress.getByName(deviceId).isReachable(2);
+				} catch (UnknownHostException e) {
+					logger.debug("Could not resolve {}.", name);
+					return;
+				} catch (IOException e) {
+					logger.debug("IO-problem encountered when contacting {}.", name);
+					return;
+				}
+				
 				/*
 				 * check if a device with this id is already configured
 				 */
-				if (enigmaNodes.containsKey(deviceId)) {
+				if (reachable && enigmaNodes.containsKey(deviceId)) {
 					Enigma2Node node = enigmaNodes.get(deviceId);
 
 					/*
