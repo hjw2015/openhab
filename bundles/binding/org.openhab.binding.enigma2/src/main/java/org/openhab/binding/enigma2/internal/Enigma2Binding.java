@@ -98,52 +98,54 @@ public class Enigma2Binding extends
 				String deviceId = bindingConfig.getDeviceId();
 
 				boolean reachable = false;
-				
+
 				try {
 					reachable = InetAddress.getByName(deviceId).isReachable(2);
 				} catch (UnknownHostException e) {
 					logger.debug("Could not resolve {}.", name);
 					return;
 				} catch (IOException e) {
-					logger.debug("IO-problem encountered when contacting {}.", name);
+					logger.debug("IO-problem encountered when contacting {}.",
+							name);
 					return;
 				}
-				
+
 				/*
 				 * check if a device with this id is already configured
 				 */
-				if (reachable && enigmaNodes.containsKey(deviceId)) {
-					Enigma2Node node = enigmaNodes.get(deviceId);
+				if (reachable)
+					if (enigmaNodes.containsKey(deviceId)) {
+						Enigma2Node node = enigmaNodes.get(deviceId);
 
-					/*
-					 * yes, there is a device with this id, now update it
-					 */
-					String value = null;
-					switch (bindingConfig.getCmdId()) {
-					case VOLUME:
-						value = node.getVolume();
-						break;
-					case CHANNEL:
-						value = node.getChannel();
-						break;
-					case POWERSTATE:
-						value = node.getOnOff();
-						break;
-					case PAUSE:
-						logger.debug("Querying the player state (Play/Pause) is currently not supported");
-						break;
-					case MUTE:
-						value = node.getMuteUnmute();
-						break;
-					default:
-						break;
+						/*
+						 * yes, there is a device with this id, now update it
+						 */
+						String value = null;
+						switch (bindingConfig.getCmdId()) {
+						case VOLUME:
+							value = node.getVolume();
+							break;
+						case CHANNEL:
+							value = node.getChannel();
+							break;
+						case POWERSTATE:
+							value = node.getOnOff();
+							break;
+						case PAUSE:
+							logger.debug("Querying the player state (Play/Pause) is currently not supported");
+							break;
+						case MUTE:
+							value = node.getMuteUnmute();
+							break;
+						default:
+							break;
+						}
+						if (value != null) {
+							postUpdate(provider, bindingConfig.getItem(), value);
+						}
+					} else {
+						logger.error("Unknown deviceId \"{}\"", deviceId);
 					}
-					if (value != null) {
-						postUpdate(provider, bindingConfig.getItem(), value);
-					}
-				} else {
-					logger.error("Unknown deviceId \"{}\"", deviceId);
-				}
 			}
 		}
 	}
