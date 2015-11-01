@@ -8,9 +8,6 @@
  */
 package org.openhab.binding.enigma2.internal;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -54,7 +51,7 @@ public class Enigma2Binding extends
 	 * the refresh interval which is used to poll values from the Enigma2 server
 	 * (optional, defaults to 60000ms)
 	 */
-	private long refreshInterval = 10000;
+	private long refreshInterval = 60000;
 
 	public Enigma2Binding() {
 	}
@@ -97,55 +94,43 @@ public class Enigma2Binding extends
 						.getBindingConfigFor(name);
 				String deviceId = bindingConfig.getDeviceId();
 
-				boolean reachable = false;
-
-				try {
-					reachable = InetAddress.getByName(deviceId).isReachable(2);
-				} catch (UnknownHostException e) {
-					logger.debug("Could not resolve {}.", name);
-					return;
-				} catch (IOException e) {
-					logger.debug("IO-problem encountered when contacting {}.",
-							name);
-					return;
-				}
-
 				/*
 				 * check if a device with this id is already configured
 				 */
-				if (reachable)
-					if (enigmaNodes.containsKey(deviceId)) {
-						Enigma2Node node = enigmaNodes.get(deviceId);
+				if (enigmaNodes.containsKey(deviceId)) {
+					Enigma2Node node = enigmaNodes.get(deviceId);
 
-						/*
-						 * yes, there is a device with this id, now update it
-						 */
-						String value = null;
-						switch (bindingConfig.getCmdId()) {
-						case VOLUME:
-							value = node.getVolume();
-							break;
-						case CHANNEL:
-							value = node.getChannel();
-							break;
-						case POWERSTATE:
-							value = node.getOnOff();
-							break;
-						case PAUSE:
-							logger.debug("Querying the player state (Play/Pause) is currently not supported");
-							break;
-						case MUTE:
-							value = node.getMuteUnmute();
-							break;
-						default:
-							break;
-						}
-						if (value != null) {
-							postUpdate(provider, bindingConfig.getItem(), value);
-						}
-					} else {
-						logger.error("Unknown deviceId \"{}\"", deviceId);
+					/*
+					 * yes, there is a device with this id, now update it
+					 */
+					String value = null;
+					switch (bindingConfig.getCmdId()) {
+					case VOLUME:
+						value = node.getVolume();
+						break;
+					case CHANNEL:
+						value = node.getChannel();
+						break;
+					case POWERSTATE:
+						value = node.getOnOff();
+						break;
+					case PAUSE:
+						logger.debug("Querying the player state (Play/Pause) is currently not supported");
+						break;
+					case MUTE:
+						value = node.getMuteUnmute();
+						break;
+					case DOWNMIX:
+						value = node.getDownmix();
+					default:
+						break;
 					}
+					if (value != null) {
+						postUpdate(provider, bindingConfig.getItem(), value);
+					}
+				} else {
+					logger.error("Unknown deviceId \"{}\"", deviceId);
+				}
 			}
 		}
 	}
@@ -231,6 +216,9 @@ public class Enigma2Binding extends
 					break;
 				case POWERSTATE:
 					node.sendOnOff(command, Enigma2PowerState.STANDBY);
+					break;
+				case DOWNMIX:
+					node.setDownmix(command);
 					break;
 				default:
 					logger.error("Unknown cmdId \"{}\"",
