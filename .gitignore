@@ -15,6 +15,7 @@ distribution/openhabhome/etc/rrd4j/*.rrd
 *.xml_gen
 *.orig
 *~
+features/*/src/main/history
 /bundles/model/org.openhab.model.codegen/.settings/org.eclipse.jdt.core.prefs
 /bundles/model/org.openhab.model.item/.settings/org.eclipse.jdt.core.prefs
 /bundles/model/org.openhab.model.script/.settings/org.eclipse.jdt.core.prefs
