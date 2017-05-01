@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2010-2016 by the respective copyright holders.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.io.transport.cul;
 
 import java.util.Dictionary;
@@ -69,6 +77,7 @@ public class CULLifecycleManager {
 
     public void open() {
         if (config == null || (cul != null && config.equals(cul.getConfig()))) {
+            logger.warn("CUL config is NULL, doing nothing");
             return;
         }
 
@@ -76,13 +85,13 @@ public class CULLifecycleManager {
         try {
             cul = culManager.getOpenCULHandler(config);
         } catch (CULDeviceException e) {
-            logger.error("Can't open CUL", e);
+            logger.warn("Can't open CUL", e);
         }
 
         try {
             listener.open(cul);
         } catch (CULCommunicationException e) {
-            logger.error("Can't set parameters", e);
+            logger.warn("Can't start listener", e);
             cul = null;
         }
     }

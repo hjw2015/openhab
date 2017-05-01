@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2016, openHAB.org and others.
+ * Copyright (c) 2010-2016 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -123,8 +123,10 @@ public class Telegram {
 
         } catch (HttpException e) {
             logger.error("Fatal protocol violation: {}", e.toString());
+            return false;
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.toString());
+            return false;
         } finally {
             postMethod.releaseConnection();
         }
@@ -223,7 +225,7 @@ public class Telegram {
             parts[1] = new FilePart("photo",
                     new ByteArrayPartSource(String.format("image.%s", imageType), imageFromURL));
             if (caption != null) {
-                parts[2] = new StringPart("caption", caption);
+                parts[2] = new StringPart("caption", caption, "UTF-8");
             }
             postMethod.setRequestEntity(new MultipartRequestEntity(parts, postMethod.getParams()));
 
@@ -240,8 +242,10 @@ public class Telegram {
             }
         } catch (HttpException e) {
             logger.error("Fatal protocol violation: {}", e.toString());
+            return false;
         } catch (IOException e) {
             logger.error("Fatal transport error: {}", e.toString());
+            return false;
         } finally {
             postMethod.releaseConnection();
         }

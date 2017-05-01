@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2016, openHAB.org and others.
+ * Copyright (c) 2010-2016 by the respective copyright holders.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -91,7 +91,13 @@ public class MqttService implements ManagedService {
             } else if (property.equals("async")) {
                 conn.setAsync(Boolean.parseBoolean(value));
             } else if (property.equals("clientId")) {
+                if (value.length() > 65535) {
+                    logger.warn("clientId must be less than 65536 characters long");
+                    throw new ConfigurationException("clientId", "clientId must be less than 65536 characters long");
+                }
                 conn.setClientId(value);
+            } else if (property.equals("allowLongerClientIds")) {
+                conn.setAllowLongerClientIds(Boolean.parseBoolean(value));
             } else if (property.equals("lwt")) {
                 MqttWillAndTestament will = MqttWillAndTestament.fromString(value);
                 logger.debug("Setting last will: {}", will);
